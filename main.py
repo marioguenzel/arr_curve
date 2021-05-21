@@ -186,7 +186,7 @@ def _test_scheme(gScheme, taskset):
         arr_curves = [our.arr_sporadic(task['period']) for task in taskset]
         # do sched test
         return our.sched_test(taskset, arr_curves, choose_xvec=4)
-    elif gScheme == ['Exhaust H', 'Exhaust L']:
+    elif gScheme in ['Exhaust H', 'Exhaust L']:
         # make arrival curve
         arr_curves = [our.arr_sporadic(task['period']) for task in taskset]
         # do sched test
@@ -199,17 +199,17 @@ def _test_scheme(gScheme, taskset):
         tasksetJ = _make_jitter_tasks(taskset, 0.2)
         return uni.UniFramework(tasksetJ)
     elif gScheme == 'Our J10':
-        arr_curves = [our.arr_jit(tsk['period'], 0.1) for tsk in taskset]
+        arr_curves = [our.arr_jitter(tsk['period'], 0.1) for tsk in taskset]
         tasksetJ = _make_jitter_tasks(taskset, 0.1)
         return our.sched_test(tasksetJ, arr_curves, choose_xvec=4)
     elif gScheme == 'Our J20':
         tasksetJ = _make_jitter_tasks(taskset, 0.2)
-        arr_curves = [our.arr_jit(tsk['period'], 0.2) for tsk in taskset]
+        arr_curves = [our.arr_jitter(tsk['period'], 0.2) for tsk in taskset]
         return our.sched_test(tasksetJ, arr_curves, choose_xvec=4)
     # ==logarithmic arrival curve==
     elif gScheme == 'SOTA log':
         return uni.UniFramework(taskset)
-    elif gScheme == 'Our J10':
+    elif gScheme == 'Our log':
         arr_curves = [our.arr_log(tsk['period']) for tsk in taskset]
         return our.sched_test(taskset, arr_curves, choose_xvec=4)
     else:
@@ -334,7 +334,7 @@ if __name__ == '__main__':
         for gScheme in gSchemes:
             # test
             results = list(zip(itertools.count(start=gUStart, step=gUStep),
-                               test_scheme(gScheme, tasksets_difutil, multiproc=10)))
+                               test_scheme(gScheme, tasksets_difutil, multiproc=0)))
             print(list(results))
             # store results
             store_results(results, datapath, gScheme + '.npy')

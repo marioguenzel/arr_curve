@@ -230,14 +230,21 @@ def _compute_maxcurrwl(
 class ArrivalCurve:
     def __init__(self, func):
         self.base_function = func
+        self.arrivals = []
+        self.arrivals_gen = None
 
     def __call__(self, inputvalue):
         return self.base_function(inputvalue)
 
     def set_arrival_times(self, arrivallist):
         '''Set lower time bounds for the first arrivals.
-        Arrivallist can be a list or a generator.'''
+        Arrivallist as generator.'''
         self.arrivals = arrivallist
+
+    def set_arrival_times_gen(self, generator):
+        '''Set lower time bounds for the first arrivals.
+        Arrivallist as generator.'''
+        self.arrivals_gen = generator
 
     def compute_first_arrivals(self, number, stepsize):
         '''Compute lower time bound for the first (number) arrivals.'''
@@ -258,15 +265,11 @@ class ArrivalCurve:
         in a suspension-aware busy interval.
         Note: arrivals has to be computed or set.'''
 
-        if hasattr(self.arrivals, '__getitem__'):
-            return self.arrivals[number]
-        else:  # generator
-            ind = 0
-            for entry in self.arrivals():
-                if ind >= int(number):
-                    return entry
-                else:
-                    ind += 1
+        while True:
+            if len(self.arrivals) > number:
+                return self.arrivals[number]
+            else:  # fill list using the generator
+                self.arrivals.append(next(self.arrivals_gen))
 
 
 def arr_sporadic(min_inter_arr):
@@ -284,7 +287,7 @@ def arr_sporadic(min_inter_arr):
             timevar += min_inter_arr
 
     arr_curv = ArrivalCurve(arr)
-    arr_curv.set_arrival_times(arr_times)
+    arr_curv.set_arrival_times_gen(arr_times())
 
     return arr_curv
 
@@ -306,7 +309,7 @@ def arr_jitter(min_inter_arr, jit):
             timevar += min_inter_arr
 
     arr_curv = ArrivalCurve(arr)
-    arr_curv.set_arrival_times(arr_times)
+    arr_curv.set_arrival_times_gen(arr_times())
 
     return arr_curv
 
@@ -326,7 +329,7 @@ def arr_log(min_inter_arr):
             yield timevar
 
     arr_curv = ArrivalCurve(arr)
-    arr_curv.set_arrival_times(arr_times)
+    arr_curv.set_arrival_times_gen(arr_times())
 
     return arr_curv
 
