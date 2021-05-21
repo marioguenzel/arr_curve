@@ -239,8 +239,8 @@ if __name__ == '__main__':
         quit()
 
     # Settings
-    gTotBucket = 10  # total number of task sets per utilization
-    gTasksinBkt = 10  # tasks per set
+    gTotBucket = 200  # total number of task sets per utilization
+    gTasksinBkt = 50  # tasks per set
 
     gUStart = 0  # utilization start
     gUEnd = 100  # utilization end
@@ -288,17 +288,17 @@ if __name__ == '__main__':
         # high suspension
         gSchemes = ['All 0 H', 'All 1 H', 'Heuristic Lin H', 'Exhaust H']
         plotname = '10_heuristic_useful'
-        gTasksinBkt = 3
+        gTasksinBkt = 10
         deadline_stretch = 1.3
         gMaxsstype = 0.4  # maximal total self-suspension length
-        gMinsstype = 0.2  # minimal total self-suspension length
+        gMinsstype = 0.1  # minimal total self-suspension length
     elif scheme_flag == '11':
         # low suspension
         gSchemes = ['All 0 L', 'All 1 L', 'Heuristic Lin L', 'Exhaust L']
         plotname = '11_heuristic_useful'
-        gTasksinBkt = 3
+        gTasksinBkt = 10
         deadline_stretch = 1.3
-        gMaxsstype = 0.2  # maximal total self-suspension length
+        gMaxsstype = 0.1  # maximal total self-suspension length
         gMinsstype = 0.0  # minimal total self-suspension length
     # ==Benefit with DL increase==
     elif scheme_flag == '12':
@@ -334,7 +334,7 @@ if __name__ == '__main__':
         for gScheme in gSchemes:
             # test
             results = list(zip(itertools.count(start=gUStart, step=gUStep),
-                               test_scheme(gScheme, tasksets_difutil, multiproc=0)))
+                               test_scheme(gScheme, tasksets_difutil, multiproc=100)))
             print(list(results))
             # store results
             store_results(results, datapath, gScheme + '.npy')

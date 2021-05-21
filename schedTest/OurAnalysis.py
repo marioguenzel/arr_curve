@@ -275,7 +275,7 @@ class ArrivalCurve:
 def arr_sporadic(min_inter_arr):
     '''Returns the arrival curve for a sporadic task.'''
     def arr(delta):
-        if delta < 0:
+        if delta <= 0:
             return 0
         else:
             return math.ceil(delta/min_inter_arr)
@@ -295,7 +295,7 @@ def arr_sporadic(min_inter_arr):
 def arr_jitter(min_inter_arr, jit):
     '''Returns the arrival curve for a task with jitter.'''
     def arr(delta):
-        if delta < 0:
+        if delta <= 0:
             return 0
         else:
             return math.ceil((delta + jit*min_inter_arr)/min_inter_arr)
@@ -317,7 +317,7 @@ def arr_jitter(min_inter_arr, jit):
 def arr_log(min_inter_arr):
     '''Returns the logarithmic arrival curve for a task.'''
     def arr(delta):
-        if delta < 0:
+        if delta <= 0:
             return 0
         else:
             return np.log(delta+1)/np.log(min_inter_arr+1) + 1
