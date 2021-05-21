@@ -2,6 +2,7 @@
 
 import itertools
 import math
+import numpy as np
 
 
 def _WCRT_bound(
@@ -86,6 +87,10 @@ def sched_test(
                 xveclist = Gen_xvec.heuristic1(taskset)
             elif choose_xvec == 4:
                 xveclist = Gen_xvec.heuristic2(taskset, wcrtlist)
+            elif choose_xvec == 5:
+                xveclist = (Gen_xvec.all_zero(len(taskset))
+                            + Gen_xvec.all_one(len(taskset))
+                            + Gen_xvec.heuristic2(taskset, wcrtlist))
         else:
             xveclist = own_xvec
 
@@ -135,7 +140,7 @@ class Gen_xvec:
         return [[1] * list_length]
 
     def heuristic1(taskset):
-        '''Linear approximation from the end of the technical report of 
+        '''Heuristic from the end of the technical report of 
         "A Unifying Response Time Analysis Framework for DynamicSelf-Suspending
         Tasks" by Chen, Nelissen, Huang in 20116'''
         vec = []
@@ -147,7 +152,7 @@ class Gen_xvec:
         return [vec]
 
     def heuristic2(taskset, wcrts):
-        '''Heuristic from the end of the technical report of 
+        '''Linear approximation from the end of the technical report of 
         "A Unifying Response Time Analysis Framework for DynamicSelf-Suspending
         Tasks" by Chen, Nelissen, Huang in 20116'''
 
@@ -284,6 +289,48 @@ def arr_sporadic(min_inter_arr):
     return arr_curv
 
 
+def arr_jitter(min_inter_arr, jit):
+    '''Returns the arrival curve for a task with jitter.'''
+    def arr(delta):
+        if delta < 0:
+            return 0
+        else:
+            return math.ceil((delta + jit*min_inter_arr)/min_inter_arr)
+
+    def arr_times():
+        timevar = 0.0
+        yield timevar
+        timevar += (1-jit) * min_inter_arr
+        while True:
+            yield timevar
+            timevar += min_inter_arr
+
+    arr_curv = ArrivalCurve(arr)
+    arr_curv.set_arrival_times(arr_times)
+
+    return arr_curv
+
+
+def arr_log(min_inter_arr):
+    '''Returns the logarithmic arrival curve for a task.'''
+    def arr(delta):
+        if delta < 0:
+            return 0
+        else:
+            return np.log(delta+1)/np.log(min_inter_arr+1) + 1
+
+    def arr_times():
+        for ind in itertools.count(start=1):
+            timevar = (ind-1)*np.log(min_inter_arr+1)
+            timevar = np.exp(timevar) - 1
+            yield timevar
+
+    arr_curv = ArrivalCurve(arr)
+    arr_curv.set_arrival_times(arr_times)
+
+    return arr_curv
+
+
 if __name__ == '__main__':
     # # Test all combinations:
     # print('=Test all combinations=')
@@ -308,6 +355,14 @@ if __name__ == '__main__':
     # for number in range(5):
     #     print(number, arr_curve.arrival_time(number))
 
+    # Test arrival curve for jitter:
+    print('=Test Arrival Curve for jitter=')
+    arr_curve = arr_jitter(4, 0.5)
+    for delta in range(-10, 15):
+        print(delta, arr_curve(delta))
+    for number in range(5):
+        print(number, arr_curve.arrival_time(number))
+
     # # Test compute A1:
     # print('=Test Compute A1=')
     # arr_curve = arr_sporadic(3)
@@ -328,37 +383,37 @@ if __name__ == '__main__':
     #     print(delta, _compute_A0(
     #         delta, {'period': 3, 'execution': 1}, arr_curve, 7))
 
-    # Test schedulability test
-    print('=Test 1 schedulability test=')
-    taskset = []
-    taskset.append({'period': 4, 'deadline': 4,
-                   'execution': 1, 'sslength': 1})
-    taskset.append({'period': 10, 'deadline': 12,
-                   'execution': 2, 'sslength': 5})
-    taskset.append({'period': 100, 'deadline': 80,
-                   'execution': 10, 'sslength': 20})
+    # # Test schedulability test
+    # print('=Test 1 schedulability test=')
+    # taskset = []
+    # taskset.append({'period': 4, 'deadline': 4,
+    #                'execution': 1, 'sslength': 1})
+    # taskset.append({'period': 10, 'deadline': 12,
+    #                'execution': 2, 'sslength': 5})
+    # taskset.append({'period': 100, 'deadline': 80,
+    #                'execution': 10, 'sslength': 20})
 
-    arr_curves = [arr_sporadic(4), arr_sporadic(10), arr_sporadic(100)]
+    # arr_curves = [arr_sporadic(4), arr_sporadic(10), arr_sporadic(100)]
 
-    print(sched_test(taskset, arr_curves, choose_xvec=0, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=1, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=2, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=3, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=4, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=0, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=1, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=2, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=3, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=4, flag_return_response=True))
 
-    print('=Test 2 schedulability test=')
-    taskset = []
-    taskset.append({'period': 50, 'deadline': 200,
-                   'execution': 10, 'sslength': 10})
-    taskset.append({'period': 100, 'deadline': 200,
-                   'execution': 15, 'sslength': 15})
-    taskset.append({'period': 100, 'deadline': 300,
-                   'execution': 40, 'sslength': 20})
+    # print('=Test 2 schedulability test=')
+    # taskset = []
+    # taskset.append({'period': 50, 'deadline': 200,
+    #                'execution': 10, 'sslength': 10})
+    # taskset.append({'period': 100, 'deadline': 200,
+    #                'execution': 15, 'sslength': 15})
+    # taskset.append({'period': 100, 'deadline': 300,
+    #                'execution': 40, 'sslength': 20})
 
-    arr_curves = [arr_sporadic(50), arr_sporadic(100), arr_sporadic(100)]
+    # arr_curves = [arr_sporadic(50), arr_sporadic(100), arr_sporadic(100)]
 
-    print(sched_test(taskset, arr_curves, choose_xvec=0, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=1, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=2, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=3, flag_return_response=True))
-    print(sched_test(taskset, arr_curves, choose_xvec=4, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=0, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=1, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=2, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=3, flag_return_response=True))
+    # print(sched_test(taskset, arr_curves, choose_xvec=4, flag_return_response=True))

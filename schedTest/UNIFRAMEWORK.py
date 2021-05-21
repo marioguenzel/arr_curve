@@ -124,3 +124,20 @@ def UniFramework(tasks):
             tasks[idx]['wcrt_uniframework'] = wcrt  # set wcrt
             continue
     return True
+
+
+def UniFramework_all0(tasks):
+    def all_zero(length):
+        return [0]*length
+
+    for idx in range(len(tasks)):
+        vec = all_zero(idx)
+
+        wcrt = compute_WCRT_bound(tasks[idx], tasks[:idx], vec)
+
+        if wcrt > tasks[idx]['deadline']:  # deadline miss
+            return False
+        else:
+            tasks[idx]['wcrt_uniframework'] = wcrt  # set wcrt
+            continue
+    return True
