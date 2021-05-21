@@ -55,6 +55,7 @@ def compute_WCRT_bound(task, HPTasks, vec_x):
 
     return wcrt
 
+
 # Compute vector for linear approximation, using Equation 27
 # Input: Tasks, current task index
 # Output: Assignment vector
