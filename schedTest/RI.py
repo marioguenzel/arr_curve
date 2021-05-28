@@ -211,11 +211,12 @@ def RI_var(tasks, eta=0.01, max_a=1, depth=3, setprio=0):
                     breakpoint()
 
                 # Check schedulability condition.
-                if resp_cand <= ord_tasks[indk]['period']:
-                    resp[indk] = min(resp_a)  # WCRT upper bound
-                    break
                 if resp_cand > ord_tasks[indk]['deadline'] or inda == max_a:
                     solved = False
                     resp[indk] = ord_tasks[indk]['deadline']
                     break
+                if resp_cand <= ord_tasks[indk]['period']:
+                    resp[indk] = min(resp_a)  # WCRT upper bound
+                    break
+
     return solved

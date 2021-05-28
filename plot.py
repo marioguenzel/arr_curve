@@ -16,6 +16,64 @@ def pickColor(ischeme):
         color = '#000000'
     elif ischeme == 'UniFramework':
         color = '#0000ff'
+
+    elif ischeme in [  # --- 5 Evaluation.
+            'Our D1.0'
+    ]:
+        color = '#99ff99'
+    elif ischeme in [
+            'Our D1.1'
+    ]:
+        color = '#4dff4d'
+    elif ischeme in [
+            'Our D1.2'
+    ]:
+        color = '#00e600'
+    elif ischeme in [
+            'Our D1.3'
+    ]:
+        color = '#00b300'
+    elif ischeme in [
+            'Our D1.4'
+    ]:
+        color = '#006600'
+    elif ischeme in [
+            'Our D1.5'
+    ]:
+        color = '#000000'
+
+    elif ischeme in [
+            'SOTA J Spor'
+    ]:
+        color = '#c44dff'
+
+    elif ischeme in [
+            'SOTA J CPA'
+    ]:
+        color = '#339966'
+
+    elif ischeme in [
+            'All 0'
+    ]:
+        color = '#009900'
+
+    elif ischeme in [
+            'All 1'
+    ]:
+        color = '#3366ff'
+    elif ischeme in [
+            'Heuristic Lin'
+    ]:
+        color = '#ff9933'
+    elif ischeme in [
+            'Exhaust'
+    ]:
+        color = '#ff0000'
+    elif ischeme in [
+            'Our J', 'Comb 3'
+    ]:
+        color = '#000000'
+
     else:  # --- Other: Randomly.
         color = "#%06x" % random.randint(0, 0xFFFFFF)
     return color
@@ -32,6 +90,36 @@ def pickMarker(ischeme):  # TODO adjust
             'EL-fix EDF D1.5', 'EL-var EDF D1.5'
     ]:
         marker = 'o'
+    elif ischeme in [  # --- 5 Evaluation.
+            'Our D1.0',
+            'Comb 3'
+    ]:
+        marker = '>'
+    elif ischeme in [
+            'Our D1.1',
+            'All 0'
+    ]:
+        marker = '*'
+    elif ischeme in [
+            'Our D1.2',
+            'Exhaust'
+
+    ]:
+        marker = 'x'
+    elif ischeme in [
+            'Our D1.3'
+    ]:
+        marker = '<'
+    elif ischeme in [
+            'Our D1.4',
+            'All 1'
+    ]:
+        marker = 'v'
+    elif ischeme in [
+            'Our D1.5',
+            'Heuristic Lin'
+    ]:
+        marker = 'o'
     else:
         randommarker = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', '|',
                         'p', 'P', '*', '+', 'x', 'X', 'D', 'd']
@@ -44,6 +132,12 @@ def pickName(ischeme):  # TODO adjust
     name = ''
     if ischeme == 'UniFramework':  # --- 1 DM Evaluation.
         name = 'CNH16'
+    elif ischeme == 'SOTA J Spor':
+        name = 'SOTA Spor'
+    elif ischeme == 'SOTA J CPA':
+        name = 'SOTA CPA'
+    elif ischeme == 'Our J':
+        name = 'Our'
     else:
         name = ischeme
     return name

@@ -46,10 +46,10 @@ def _WCRT_bound(
 
         resp = theta - arrival_bound
 
-        if lhs <= theta:  # wcrt upper bound found
+        if resp > task_an['deadline']:
             break
 
-        if resp > task_an['deadline']:
+        if lhs <= theta:  # wcrt upper bound found
             break
 
         theta = lhs  # increase theta
@@ -62,7 +62,7 @@ def sched_test(
         arr_curves,  # list of arrival curve objects
         choose_xvec=0,  # choose xvectors from a predefined list
         own_xvec=None,  # set own list of xvectors
-        upperbound_a=5,  # upper bound for the index a
+        upperbound_a=10,  # upper bound for the index a
         # return response times instead of True, False is still returned:
         flag_return_response=False
 ):
@@ -77,17 +77,17 @@ def sched_test(
 
         # set xvec list
         if own_xvec is None:
-            if choose_xvec == 0:
+            if choose_xvec in [0, 'exh']:
                 xveclist = Gen_xvec.all_combinations(len(taskset))
-            elif choose_xvec == 1:
+            elif choose_xvec in [1, 'all0']:
                 xveclist = Gen_xvec.all_zero(len(taskset))
-            elif choose_xvec == 2:
+            elif choose_xvec in [2, 'all1']:
                 xveclist = Gen_xvec.all_one(len(taskset))
-            elif choose_xvec == 3:
+            elif choose_xvec in [3, 'SleqC']:
                 xveclist = Gen_xvec.heuristic1(taskset)
-            elif choose_xvec == 4:
+            elif choose_xvec in [4, 'lin']:
                 xveclist = Gen_xvec.heuristic2(taskset, wcrtlist)
-            elif choose_xvec == 5:
+            elif choose_xvec in [5, 'comb3']:
                 xveclist = (Gen_xvec.all_zero(len(taskset))
                             + Gen_xvec.all_one(len(taskset))
                             + Gen_xvec.heuristic2(taskset, wcrtlist))
@@ -113,10 +113,10 @@ def sched_test(
             task_wcrtlist.append(wcrt_bound_a)
 
             # Check
-            if wcrt_bound_a <= tsk['period']:
-                break  # break a
             if wcrt_bound_a > tsk['deadline'] or inda >= upperbound_a:
                 return False
+            if wcrt_bound_a <= arr_curves[ind].arrival_time(inda) - arr_curves[ind].arrival_time(inda-1):
+                break  # break a
 
         wcrtlist.append(max(task_wcrtlist))  # add wcrt to list
 
@@ -213,7 +213,11 @@ def _compute_A0(
     res *= taskj['execution']
     res += Cstar
 
-    return res
+    # trivial bound
+    res2 = arrj(delta + wcrtj) * taskj['execution']
+
+    # return res
+    return min(res, res2)
 
 
 def _compute_maxcurrwl(
@@ -334,6 +338,97 @@ def arr_log(min_inter_arr):
     return arr_curv
 
 
+def sota_CPA(
+        taskset,  # the taskset under analysis
+        arr_curves,  # list of arrival curve objects
+        upperbound_a=10,  # upper bound for the index a
+        # return response times instead of True, False is still returned:
+        flag_return_response=False
+):
+    ''' State of the art for jitter based analysis (CPA).
+    '''
+    # WCRT list
+    wcrtlist = []
+
+    for ind, tsk in enumerate(taskset):
+
+        # analyse the task
+        task_wcrtlist = []
+
+        # (inda)-th job in a suspension-aware busy interval
+        for inda in itertools.count(start=1):
+            wcrt_bound_a = _sota_CPA_wcrtbound(
+                ind, taskset, arr_curves, wcrtlist, inda)
+
+            task_wcrtlist.append(wcrt_bound_a)
+
+            # Check
+            if wcrt_bound_a > tsk['deadline'] or inda >= upperbound_a:
+                return False
+            if wcrt_bound_a <= arr_curves[ind].arrival_time(inda) - arr_curves[ind].arrival_time(inda-1):
+                break  # break a
+
+        wcrtlist.append(max(task_wcrtlist))  # add wcrt to list
+
+    if flag_return_response is True:
+        return wcrtlist
+    else:
+        return True
+
+
+def _sota_CPA_compute_interference(delta, tasks, WCRTs, arr_curves):
+    val = 0
+    for ind, wcrt in enumerate(WCRTs):
+        val += arr_curves[ind](delta + wcrt) * tasks[ind]['execution']
+    return val
+
+
+def _sota_CPA_wcrtbound(ind, taskset, arr_curves, wcrtlist, inda):
+    tsk = taskset[ind]
+    arrival_bound = arr_curves[ind].arrival_time(inda-1)
+    theta = 0
+    while True:
+        lhs = inda * (tsk['execution'] + tsk['sslength']) + \
+            _sota_CPA_compute_interference(
+                theta, taskset, wcrtlist, arr_curves)
+
+        resp = theta - arrival_bound
+
+        if resp > tsk['deadline'] or lhs <= theta:
+            break
+        else:
+            theta = lhs
+    # breakpoint()
+
+    return resp
+
+
+# def sota_CPA(taskset, arr_curves):
+#     def compute_interference(delta, tasks, WCRTs, arr_curves):
+#         val = 0
+#         for ind, wcrt in enumerate(WCRTs):
+#             val += arr_curves[ind](delta + wcrt) * tasks[ind]['execution']
+#         return val
+
+#     WCRTs = []
+
+#     for tsk in taskset:
+#         theta = 0
+#         while True:
+#             lhs = tsk['execution'] + tsk['sslength'] + \
+#                 compute_interference(theta, taskset, WCRTs, arr_curves)
+
+#             if lhs > tsk['deadline']:
+#                 return False
+#             elif lhs <= theta:
+#                 WCRTs.append(theta)
+#                 break
+#             else:
+#                 theta = lhs
+
+#     return True
+
+
 if __name__ == '__main__':
     # # Test all combinations:
     # print('=Test all combinations=')
@@ -358,13 +453,13 @@ if __name__ == '__main__':
     # for number in range(5):
     #     print(number, arr_curve.arrival_time(number))
 
-    # Test arrival curve for jitter:
-    print('=Test Arrival Curve for jitter=')
-    arr_curve = arr_jitter(4, 0.5)
-    for delta in range(-10, 15):
-        print(delta, arr_curve(delta))
-    for number in range(5):
-        print(number, arr_curve.arrival_time(number))
+    # # Test arrival curve for jitter:
+    # print('=Test Arrival Curve for jitter=')
+    # arr_curve = arr_jitter(4, 0.5)
+    # for delta in range(-10, 15):
+    #     print(delta, arr_curve(delta))
+    # for number in range(5):
+    #     print(number, arr_curve.arrival_time(number))
 
     # # Test compute A1:
     # print('=Test Compute A1=')
@@ -420,3 +515,16 @@ if __name__ == '__main__':
     # print(sched_test(taskset, arr_curves, choose_xvec=2, flag_return_response=True))
     # print(sched_test(taskset, arr_curves, choose_xvec=3, flag_return_response=True))
     # print(sched_test(taskset, arr_curves, choose_xvec=4, flag_return_response=True))
+
+    print('=Test 3 sota cpa=')
+    taskset = []
+    taskset.append({'period': 50, 'deadline': 100,
+                   'execution': 10, 'sslength': 10})
+    taskset.append({'period': 100, 'deadline': 200,
+                   'execution': 15, 'sslength': 15})
+    taskset.append({'period': 100, 'deadline': 300,
+                   'execution': 40, 'sslength': 20})
+
+    arr_curves = [arr_sporadic(50), arr_sporadic(100), arr_sporadic(100)]
+
+    print(sota_CPA(taskset, arr_curves))
