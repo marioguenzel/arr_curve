@@ -468,16 +468,16 @@ if __name__ == '__main__':
     elif scheme_flag == '401':
         gSchemes = ['FP', 'EL-fixed', 'EL-var']
         plotname = '401'
-        gTotBucket = 200  # total number of task sets per utilization
+        gTotBucket = 500  # total number of task sets per utilization
         gMaxsstype = 0.3  # maximal total self-suspension length
         gMinsstype = 0.1  # minimal total self-suspension length
         deadline_stretch = [1.0, 1.2]
     elif scheme_flag == '402':
         gSchemes = ['FP', 'EL-fixed', 'EL-var']
         plotname = '402'
-        gTotBucket = 200  # total number of task sets per utilization
-        gMaxsstype = 0.3  # maximal total self-suspension length
-        gMinsstype = 0.1  # minimal total self-suspension length
+        gTotBucket = 500  # total number of task sets per utilization
+        gMaxsstype = 0.5  # maximal total self-suspension length
+        gMinsstype = 0.0  # minimal total self-suspension length
         deadline_stretch = [0.8, 1.2]
 
     ##### Comparison #####

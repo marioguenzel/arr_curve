@@ -138,6 +138,10 @@ def pickName(ischeme):  # TODO adjust
         name = 'SOTA CPA'
     elif ischeme == 'Our J':
         name = 'Our'
+    elif ischeme == 'EL-fixed':
+        name = 'EL-fix'
+    elif ischeme == 'FP':
+        name = 'GUC21'
     else:
         name = ischeme
     return name
