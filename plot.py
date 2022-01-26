@@ -184,8 +184,8 @@ def plot(schemes, results_plot, plotpath, plotname='', Ncol=3):
     ax = fig.add_subplot(111)
     fig.subplots_adjust(top=0.8, left=0.2, right=0.95, bottom=0.2, hspace=0.3)
 
-    ax.set_xlabel('Utilization (%)', size=15, fontsize=23)
-    ax.set_ylabel('Acceptance Ratio', size=15, fontsize=23)
+    ax.set_xlabel('Utilization (%)', size=23)
+    ax.set_ylabel('Acceptance Ratio', size=23)
     ax.spines['top'].set_color('black')
     ax.spines['bottom'].set_color('black')
     ax.spines['left'].set_color('black')
