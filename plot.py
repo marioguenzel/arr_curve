@@ -192,6 +192,7 @@ def plot(schemes, results_plot, plotpath, plotname='', Ncol=3):
     ax.spines['right'].set_color('black')
     ax.tick_params(labelcolor='black', top=False,
                    bottom=False, left=False, right=False, labelsize=20)
+    ax.set_yticks([0, 0.25, 0.50, 0.75, 1.0])
 
     # plot results
     for ischeme, results in zip(schemes, results_plot):
@@ -219,7 +220,7 @@ def plot(schemes, results_plot, plotpath, plotname='', Ncol=3):
         handlelength=1.8,  # length of the legend line under marker
         handletextpad=0.5,  # space between handle and text
         columnspacing=1.,  # space between columns
-        prop={'size': 20})
+        prop={'size': 18})
 
     ax.grid()
 
